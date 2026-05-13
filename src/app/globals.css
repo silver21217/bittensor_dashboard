@@ -1,26 +1,174 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  /* Surfaces */
+  --page: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
+  --surface-hover: #f5f5f5;
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4;
+  --divider: #f0f0f0;
+
+  /* Text */
+  --text: #171717;
+  --text-muted: #525252;
+  --text-dim: #737373;
+  --text-faint: #a3a3a3;
+
+  /* Brand + accents */
+  --brand: #ed2939;
+  --brand-hover: #d61d2d;
+  --brand-soft: #fef2f2;
+  --amber: #ffbf48;
+  --amber-soft: #fffbeb;
+  --orange: #ff8b1a;
+  --orange-soft: #fff4e5;
+
+  /* Semantic */
+  --success: #16a34a;
+  --success-soft: #dcfce7;
+  --danger: #ed2939;
+  --danger-soft: #fef2f2;
+  --warning: #f59e0b;
+  --warning-soft: #fffbeb;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --page: #0b0d10;
+  --surface: #14171c;
+  --surface-2: #1a1e24;
+  --surface-hover: #1f242b;
+  --border: #272c34;
+  --border-strong: #333a45;
+  --divider: #1e232a;
+
+  --text: #ededed;
+  --text-muted: #b4b4b4;
+  --text-dim: #8f8f8f;
+  --text-faint: #5a5a5a;
+
+  --brand: #ef3d4d;
+  --brand-hover: #ff5564;
+  --brand-soft: rgba(239, 61, 77, 0.14);
+  --amber: #ffc95a;
+  --amber-soft: rgba(255, 201, 90, 0.14);
+  --orange: #ff9a3c;
+  --orange-soft: rgba(255, 154, 60, 0.14);
+
+  --success: #22c55e;
+  --success-soft: rgba(34, 197, 94, 0.14);
+  --danger: #ef3d4d;
+  --danger-soft: rgba(239, 61, 77, 0.14);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.45);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background: var(--page);
+  color: var(--text);
+}
+
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a[href],
+summary,
+label[for],
+[data-sortable="true"] {
+  cursor: pointer !important;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed !important;
+}
+
+/* Kill focus outlines + any residual axis/grid strokes that Recharts emits
+   by default on its surface. We render axes/grid explicitly through props. */
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface:focus,
+.recharts-surface:focus-visible {
+  outline: none !important;
+}
+.recharts-surface .recharts-cartesian-axis-line,
+.recharts-surface .recharts-cartesian-grid line {
+  stroke: none !important;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  letter-spacing: -0.005em;
 }
+
+.tnum { font-variant-numeric: tabular-nums; }
+
+.m-card {
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px var(--border), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.m-label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.m-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 10.5px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+@keyframes liveDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5); }
+  70%      { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+}
+.live-dot { animation: liveDot 1.8s ease-out infinite; }
+
+@keyframes breath {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(0.92); opacity: 0.8; }
+}
+
+/* Smooth collapse/expand for the auto-pinned band. When a row toggles in or
+   out of the pinned group we fade + slide it, so expansion isn't a jarring
+   pop. `.m-row` is the base row; `[data-pinned="true"]` gets the colored
+   band bg. Transitioning opacity + transform only — the background swap is
+   immediate so the visual state reads correctly during the animation. */
+tbody .m-row {
+  animation: row-in 200ms ease-out both;
+}
+@keyframes row-in {
+  0%   { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.m-row:hover { background: var(--surface-hover); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
